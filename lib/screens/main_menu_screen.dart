@@ -1,9 +1,12 @@
-import 'package:flutter_flame_mini_game/game/assets.dart';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_flame_mini_game/game/assets.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../game/flappy_bird_game.dart';
 
-class MainMenuScreen extends StatelessWidget {
+class MainMenuScreen extends StatefulWidget {
   final FlappyBirdGame game;
   static const String id = 'mainMenu';
 
@@ -13,14 +16,35 @@ class MainMenuScreen extends StatelessWidget {
   });
 
   @override
+  State<MainMenuScreen> createState() => _MainMenuScreenState();
+}
+
+class _MainMenuScreenState extends State<MainMenuScreen> {
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+        widget.game.loadCustomSprite(
+          bytes: _imageFile!.readAsBytesSync(),
+        );
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    game.pauseEngine();
+    widget.game.pauseEngine();
 
     return Scaffold(
       body: GestureDetector(
         onTap: () {
-          game.overlays.remove('mainMenu');
-          game.resumeEngine();
+          widget.game.overlays.remove('mainMenu');
+          widget.game.resumeEngine();
         },
         child: Container(
           width: double.infinity,
@@ -37,10 +61,22 @@ class MainMenuScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Image.asset(Assets.message),
+                if (_imageFile != null)
+                  Expanded(
+                    child: Image.file(
+                      _imageFile!,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                else
+                  const Text("No se ha seleccionado ninguna imagen."),
+                const SizedBox(height: 20),
                 ElevatedButton(
                   style:
                       ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                  onPressed: () {},
+                  onPressed: _pickImage,
                   child: const Text(
                     'Carga tu foto!',
                     style: TextStyle(fontSize: 20),

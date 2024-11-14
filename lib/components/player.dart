@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame_audio/flame_audio.dart';
-//import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 
 import '../game/assets.dart';
@@ -17,21 +18,21 @@ class Player extends SpriteGroupComponent<PlayerMovement>
   int score = 0;
 
   @override
-  Future<void> onLoad() async {
+  Future<void> onLoad({File? customImage}) async {
     final birdMidFlap = await gameRef.loadSprite(Assets.birdMidFlap);
     final birdUpFlap = await gameRef.loadSprite(Assets.birdUpFlap);
     final birdDownFlap = await gameRef.loadSprite(Assets.birdDownFlap);
+    sprites = {
+      PlayerMovement.middle: birdMidFlap,
+      PlayerMovement.up: birdUpFlap,
+      PlayerMovement.down: birdDownFlap,
+    };
 
     gameRef.player;
 
     size = Vector2(50, 40);
     position = Vector2(50, gameRef.size.y / 2 - size.y / 2);
     current = PlayerMovement.middle;
-    sprites = {
-      PlayerMovement.middle: birdMidFlap,
-      PlayerMovement.up: birdUpFlap,
-      PlayerMovement.down: birdDownFlap,
-    };
 
     add(
       CircleHitbox(),

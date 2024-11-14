@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
@@ -11,6 +12,7 @@ import 'package:flutter_flame_mini_game/components/pipe_group.dart';
 
 import '../components/player.dart';
 import 'configuration.dart';
+import 'player_movement.dart';
 
 class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
   late Player player;
@@ -40,20 +42,31 @@ class FlappyBirdGame extends FlameGame with TapDetector, HasCollisionDetection {
         );
   }
 
-  TextComponent buildScore() {
-    return TextComponent(
-      text: 'Score: 0',
-      position: Vector2(size.x / 2, size.y / 2 * 0.2),
-      anchor: Anchor.center,
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          fontSize: 40.0,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Game',
-        ),
-      ),
-    );
+  Future<void> loadCustomSprite({required Uint8List bytes}) async {
+    // Carga la imagen desde los bytes y crea el sprite
+    final image = await decodeImageFromList(bytes);
+    final customSprite = Sprite(image);
+
+    // Asigna el sprite personalizado en todas las direcciones de movimiento
+    player.sprites = {
+      PlayerMovement.middle: customSprite,
+      PlayerMovement.up: customSprite,
+      PlayerMovement.down: customSprite,
+    };
   }
+
+  TextComponent buildScore() => TextComponent(
+        text: 'Score: 0',
+        position: Vector2(size.x / 2, size.y / 2 * 0.2),
+        anchor: Anchor.center,
+        textRenderer: TextPaint(
+          style: const TextStyle(
+            fontSize: 40.0,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Game',
+          ),
+        ),
+      );
 
   @override
   void onTap() {
